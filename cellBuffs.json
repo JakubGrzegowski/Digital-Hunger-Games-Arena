@@ -1,0 +1,12 @@
+{
+        "Damage" : {
+                "small": {
+                        "multiplier": 1.2,
+                        "indexes": [[0, 8], [15, 8], [8, 0], [8, 15]]
+                },
+                "big": {
+                        "multiplier": 1.5,
+                        "indexes": [[8, 8]]
+                }
+        }
+}

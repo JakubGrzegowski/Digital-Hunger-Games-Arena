@@ -1,0 +1,34 @@
+{
+        "GREEN": {
+                "index": 0,
+                "hp": 100,
+                "damage" : 1,
+                "defense": 10,
+                "speed": 1,
+                "name": "G "
+        },
+        "BLUE": {
+                "index": 1,
+                "hp": 100,
+                "damage" : 10,
+                "defense": 5,
+                "speed": 3,
+                "name": "B "
+        },
+        "RED": {
+                "index": 2,
+                "hp": 100,
+                "damage" : 15,
+                "defense": 5,
+                "speed": 2,
+                "name": "R "
+        },
+        "YELLOW": {
+                "index": 3,
+                "hp": 100,
+                "damage" : 10,
+                "defense": 7,
+                "speed": 2,
+                "name": "Y "
+        }
+}

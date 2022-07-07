@@ -21,7 +21,6 @@ class Gladiator:
         self.defense = defense
         self.name = name
         self.tactic = tactic
-
         self.position = position
         self.isDead = False
 
@@ -133,7 +132,7 @@ class World:
             print("cell Buffs JSON File Error")
 
     def printWorld(self):
-        wait(1)
+        wait(3)
         clearScreen()
 
         for row in self.cells:
@@ -286,7 +285,6 @@ class World:
                 if gladiator.tactic == "green":
                     targetRow, targetCol = self.findClosestBuff(gladiator, "big")
                     if not targetRow:
-                        print("chuj")
                         targetRow, targetCol = self.findClosestEnemy(gladiator)
                     drow, dcol = self.followTarget(gladiator, self.cells[targetRow][targetCol])
                 elif gladiator.tactic == "blue":
@@ -367,7 +365,7 @@ class World:
 
     def fight(self, attacker, defender):
         print(attacker.name, "is attacking ", defender.name, ". Prepare for battle!")
-        wait(1)
+        wait(3)
         round = 0
         attackerDefaultDefense = attacker.defense
         defenderDefaultDefense = defender.defense
@@ -392,12 +390,12 @@ class World:
                 self.cells[defender.position[0]][defender.position[1]].isOccupied = False
                 self.cells[defender.position[0]][defender.position[1]].gladiatorRef = None
                 self.gladiatorArray.remove(defender)
-                wait(2)
+                wait(3)
                 # end of the fight - exit loop
                 attacker.defense = attackerDefaultDefense
                 break
             defender.defense += -1
-            wait(0.1)
+            wait(0.3)
 
             # defender move
 
@@ -419,8 +417,8 @@ class World:
                 defender.defense = defenderDefaultDefense
                 break
             attacker.defense += -1
-            wait(0.1)
-        wait(1)
+            wait(0.3)
+        wait(3)
 
 
 ########################################################################################################################

@@ -1,25 +1,28 @@
-import numpy as np
 import random
+import sys
 from random import randint
-import time
 import os
 import json
-from sys import platform
+from tools import wait, clearScreen
 
 
 class Gladiator:
-    def __init__(self, position=[0,0], index=None, hp=randint(80, 100), speed=randint(1, 9), damage=randint(10, 20),
+    def __init__(self, position=None, index=None, hp=randint(80, 100), speed=randint(1, 9), damage=randint(10, 20),
                  defense=randint(1, 10), name="X"):
         # Initialized with JSON
+        if position is None:
+            position = [0, 0]
         self.index = index
         self.hp = hp
         self.speed = speed
         self.damage = damage
         self.defense = defense
         self.name = name
+        self.tactic = "yellow"
 
         self.position = position
         self.isDead = False
+
 
 ########################################################################################################################
 
@@ -31,13 +34,15 @@ class Cell:
         self.col = col
         self.isOccupied = False
         self.dmgBuff = 1
-        
+
+
 ########################################################################################################################
 
 
 class World:
-    def __init__(self, size=16, gladiatorAmount=4):
-        self.cells = [[Cell(row, col) for row in range(size)] for col in range(size)] #2D array declaration, size 16x16
+    def __init__(self, size=16):
+        self.cells = [[Cell(row, col) for row in range(size)] for col in
+                      range(size)]  # 2D array declaration, size 16x16
         self.gladiatorArray = []
         self.readGladiatorsfromJSON()
         self.readCellBuffsfromJSON()
@@ -46,25 +51,24 @@ class World:
         self.sizeY = size
         self.gameOver = False
         self.roundCounter = 0
-        self.shrinkTime = 5 # after this number of rounds arena will shrink by 1  tile
+        self.shrinkTime = 2  # after this number of rounds arena will shrink by 1  tile
         self.arenaBoundary = 0
 
-    def generateStats(self): 
-        for idx, gladiator in enumerate(self.gladiatorArray):    #assign index to each gladiator in gladiatorArray
+    def generateStats(self):
+        for idx, gladiator in enumerate(self.gladiatorArray):  # assign index to each gladiator in gladiatorArray
             self.gladiatorArray[idx].index = idx
-        
-
 
     def deployGladiators(self):
         for idx, gladiator in enumerate(self.gladiatorArray):
             while True:
-                tempx = random.randint(0,15)
-                tempy = random.randint(0,15)
-                if(self.cells[tempx][tempy].isOccupied == False):
+                tempx = random.randint(0, 15)
+                tempy = random.randint(0, 15)
+                if not self.cells[tempx][tempy].isOccupied:
                     self.cells[tempx][tempy].gladiatorRef = self.gladiatorArray[idx]
                     self.cells[tempx][tempy].isOccupied = True
                     self.gladiatorArray[idx].position = [tempx, tempy]
                     break
+
     def readConfig(self, path="config.json"):
         try:
             # open and load JSON file with gladiator statistics
@@ -86,7 +90,8 @@ class World:
                 stats = gladiators[gladiator]
                 # create and add gladiator to game
                 self.gladiatorArray.append(Gladiator(index=stats["index"], hp=stats["hp"], damage=stats["damage"],
-                                                defense=stats["defense"], speed=stats["speed"], name=stats["name"]))
+                                                     defense=stats["defense"], speed=stats["speed"],
+                                                     name=stats["name"]))
         except:
             print("gladiators JSON File Error - Creating random gladiators")
             for i in range(4):
@@ -105,11 +110,8 @@ class World:
             print("cell Buffs JSON File Error")
 
     def printWorld(self):
-        time.sleep(1)
-        if platform == "win32":
-            os.system('cls')
-        elif platform in ["linux", "linux2", "darwin"]:
-            os.system('clear')
+        wait(1)
+        clearScreen()
 
         for row in self.cells:
             for cell in row:
@@ -123,11 +125,10 @@ class World:
                         print("b ", end='')
                     else:
                         print("| ", end='')
-                    #print(" ", end='')
+                    # print(" ", end='')
                 else:
                     print(cell.gladiatorRef.name, end='')
             print()
-
 
     def executeMove(self, gladiator, drow, dcol):
 
@@ -155,7 +156,6 @@ class World:
             self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff = 1.0
             # TODO print info about collecting buff
 
-
     def move(self):
         for gladiator in self.gladiatorArray:
             for move in range(gladiator.speed):
@@ -168,8 +168,8 @@ class World:
                 moves = []
                 for move in all_moves:
                     # check if a gladiator will end up inside arena after a move
-                    if self.arenaBoundary <= gladiator.position[0] + move[0] < self.sizeX - self.arenaBoundary - 1 and\
-                        self.arenaBoundary <= gladiator.position[1] + move[1] < self.sizeY - self.arenaBoundary - 1:
+                    if self.arenaBoundary <= gladiator.position[0] + move[0] < self.sizeX - self.arenaBoundary - 1 and \
+                            self.arenaBoundary <= gladiator.position[1] + move[1] < self.sizeY - self.arenaBoundary - 1:
                         moves.append(move)
 
                 # TODO make this shit not random
@@ -179,16 +179,16 @@ class World:
                 print()
                 print(gladiator.name, " position: ", gladiator.position)
 
-                self.executeMove(gladiator,drow,dcol) # execute move of gladiator
+                self.executeMove(gladiator, drow, dcol)  # execute move of gladiator
 
                 # TODO dodać widownię dookoła areny
-                #os.system('cls')
+                # os.system('cls')
 
                 # check if the game is over
                 if len(self.gladiatorArray) <= 1:
                     self.gameOver = True
 
-                #self.printWorld()
+                # self.printWorld()
 
         self.roundCounter += 1
         if self.roundCounter % 2 == 0 and self.roundCounter != 0 and \
@@ -197,8 +197,7 @@ class World:
             print("ALERT!! ARENA IS SHRINKING !!")
             self.arenaBoundary += 1
 
-
-            # TODO push gladiator outside the boundaries
+            # push gladiator outside the boundaries
             for gladiator in self.gladiatorArray:
 
                 # check if a gladiator is inside arena
@@ -223,13 +222,9 @@ class World:
                     print(gladiator.name, " is about to being pushed into arena")
                     self.executeMove(gladiator, drow, dcol)
 
-
-
-
-
     def fight(self, attacker, defender):
         print(attacker.name, "is attacking ", defender.name, ". Prepare for battle!")
-        time.sleep(1)
+        wait(1)
         round = 0
         attackerDefaultDefense = attacker.defense
         defenderDefaultDefense = defender.defense
@@ -254,21 +249,21 @@ class World:
                 self.cells[defender.position[0]][defender.position[1]].isOccupied = False
                 self.cells[defender.position[0]][defender.position[1]].gladiatorRef = None
                 self.gladiatorArray.remove(defender)
-                time.sleep(2)
+                wait(2)
                 # end of the fight - exit loop
                 attacker.defense = attackerDefaultDefense
                 break
             defender.defense += -1
-            time.sleep(0.1)
+            wait(0.1)
 
             # defender move
 
-            damageToDeal = defender.damage - attacker.defense + random.randint(1,6)
+            damageToDeal = defender.damage - attacker.defense + random.randint(1, 6)
             if damageToDeal > 0:
                 attacker.hp -= damageToDeal
-                print(defender.name, "dealt ", damageToDeal, "damage, ", attacker.name, " HP = ",attacker.hp)
+                print(defender.name, "dealt ", damageToDeal, "damage, ", attacker.name, " HP = ", attacker.hp)
             else:
-                print(defender.name," dealt 0 damage", attacker.name, " HP = ",attacker.hp)
+                print(defender.name, " dealt 0 damage", attacker.name, " HP = ", attacker.hp)
 
             if attacker.hp <= 0:
                 print(attacker.name, " died in a battle, ", defender.name, " is victorious!")
@@ -278,25 +273,34 @@ class World:
                 self.cells[attacker.position[0]][attacker.position[1]].isOccupied = False
                 self.cells[attacker.position[0]][attacker.position[1]].gladiatorRef = None
 
-                # time.sleep(5)
+                # wait(5)
                 # end of the fight - exit loop
                 defender.defense = defenderDefaultDefense
                 break
             attacker.defense += -1
-            time.sleep(0.1)
-        time.sleep(1)
+            wait(0.1)
+        wait(1)
+
 
 ########################################################################################################################
 
 
 def main():
-
     world = World()
-
     while not world.gameOver:
-         world.printWorld()
-         world.move()
+        world.printWorld()
+        world.move()
+
+def test():
+    for i in range(1000):
+        # disable print
+        sys.stdout = sys.__stdout__
+        print(i)
+        # enable print
+        sys.stdout = open(os.devnull, 'w')
+        main()
 
 
 if __name__ == "__main__":
     main()
+    # test()

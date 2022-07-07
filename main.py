@@ -4,6 +4,7 @@ from random import randint
 import time
 import os
 import json
+from sys import platform
 
 
 class Gladiator:
@@ -45,6 +46,7 @@ class World:
         self.sizeY = size
         self.gameOver = False
         self.roundCounter = 0
+        self.shrinkTime = 5 # after this number of rounds arena will shrink by 1  tile
         self.arenaBoundary = 0
 
     def generateStats(self): 
@@ -63,6 +65,16 @@ class World:
                     self.cells[tempx][tempy].isOccupied = True
                     self.gladiatorArray[idx].position = [tempx, tempy]
                     break
+    def readConfig(self, path="config.json"):
+        try:
+            # open and load JSON file with gladiator statistics
+            jsonfile = open(path)
+            config = json.load(jsonfile)
+            self.shrinkTime = config["shrinkTime"]
+            self.sizeX = config["arenaDimensionX"]
+            self.sizeY = config["arenaDimensionY"]
+        except:
+            print("Load config failed")
 
     def readGladiatorsfromJSON(self, path="gladiators.json"):
         try:
@@ -74,7 +86,7 @@ class World:
                 stats = gladiators[gladiator]
                 # create and add gladiator to game
                 self.gladiatorArray.append(Gladiator(index=stats["index"], hp=stats["hp"], damage=stats["damage"],
-                                                     defense=stats["defense"], speed=stats["speed"], name=stats["name"]))
+                                                defense=stats["defense"], speed=stats["speed"], name=stats["name"]))
         except:
             print("gladiators JSON File Error - Creating random gladiators")
             for i in range(4):
@@ -93,11 +105,17 @@ class World:
             print("cell Buffs JSON File Error")
 
     def printWorld(self):
+        time.sleep(1)
+        if platform == "win32":
+            os.system('cls')
+        elif platform in ["linux", "linux2", "darwin"]:
+            os.system('clear')
 
         for row in self.cells:
             for cell in row:
                 if not cell.isOccupied:
-                    if cell.row < self.arenaBoundary or cell.row > self.sizeX - self.arenaBoundary - 1 or cell.col < self.arenaBoundary or cell.col > self.sizeY - self.arenaBoundary - 1:
+                    if cell.row < self.arenaBoundary or cell.row > self.sizeX - self.arenaBoundary - 1 or \
+                            cell.col < self.arenaBoundary or cell.col > self.sizeY - self.arenaBoundary - 1:
                         print("# ", end='')
                     elif cell.dmgBuff == 1.2:
                         print("s ", end='')
@@ -109,8 +127,6 @@ class World:
                 else:
                     print(cell.gladiatorRef.name, end='')
             print()
-        time.sleep(1)
-        os.system('CLS')
 
 
     def executeMove(self, gladiator, drow, dcol):
@@ -152,8 +168,8 @@ class World:
                 moves = []
                 for move in all_moves:
                     # check if a gladiator will end up inside arena after a move
-                    if self.arenaBoundary <= gladiator.position[0] + move[0] < self.sizeX - self.arenaBoundary - 1 and \
-                            self.arenaBoundary <= gladiator.position[1] + move[1] < self.sizeY - self.arenaBoundary - 1:
+                    if self.arenaBoundary <= gladiator.position[0] + move[0] < self.sizeX - self.arenaBoundary - 1 and\
+                        self.arenaBoundary <= gladiator.position[1] + move[1] < self.sizeY - self.arenaBoundary - 1:
                         moves.append(move)
 
                 # TODO make this shit not random
@@ -175,7 +191,8 @@ class World:
                 #self.printWorld()
 
         self.roundCounter += 1
-        if self.roundCounter % 2 == 0 and self.roundCounter != 0 and self.arenaBoundary < min([self.sizeX, self.sizeY]) / 2 - 2:
+        if self.roundCounter % 2 == 0 and self.roundCounter != 0 and \
+                self.arenaBoundary < min([self.sizeX, self.sizeY]) / self.shrinkTime - 2:
             print()
             print("ALERT!! ARENA IS SHRINKING !!")
             self.arenaBoundary += 1

@@ -5,7 +5,7 @@
                 "damage" : 1,
                 "defense": 10,
                 "speed": 1,
-                "name": "G ",
+                "name": "G",
                 "tactic" : "green"
         },
         "BLUE": {
@@ -14,7 +14,7 @@
                 "damage" : 10,
                 "defense": 5,
                 "speed": 3,
-                "name": "B ",
+                "name": "B",
                 "tactic" : "blue"
         },
         "RED": {
@@ -23,7 +23,7 @@
                 "damage" : 15,
                 "defense": 5,
                 "speed": 2,
-                "name": "R ",
+                "name": "R",
                 "tactic" : "red"
         },
         "YELLOW": {
@@ -32,7 +32,7 @@
                 "damage" : 10,
                 "defense": 7,
                 "speed": 2,
-                "name": "Y ",
+                "name": "Y",
                 "tactic" : "yellow"
         }
 }

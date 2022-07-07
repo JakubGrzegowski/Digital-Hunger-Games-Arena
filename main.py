@@ -1,12 +1,11 @@
 import random
-import sys
 from random import randint
-import os
 import json
 import math
+from termcolor import colored
+
 from tools import wait, clearScreen
 import numpy as np
-
 
 class Gladiator:
     def __init__(self, position=None, index=None, hp=randint(80, 100), speed=randint(1, 9), damage=randint(10, 20),
@@ -132,7 +131,7 @@ class World:
             print("cell Buffs JSON File Error")
 
     def printWorld(self):
-        wait(3)
+        wait(1)
         clearScreen()
 
         for row in self.cells:
@@ -146,10 +145,21 @@ class World:
                         print("b ", end='')
                     else:
                         print("| ", end='')
-                    # print(" ", end='')
                 else:
-                    print(cell.gladiatorRef.name, end='')
+                    if cell.gladiatorRef.name == "R":
+                        text = colored(cell.gladiatorRef.name, 'red', attrs=['reverse', 'blink'])
+                        print(text + " ", end='')
+                    elif cell.gladiatorRef.name == "B":
+                        text = colored(cell.gladiatorRef.name, 'blue', attrs=['reverse', 'blink'])
+                        print(text + " ", end='')
+                    elif cell.gladiatorRef.name == "G":
+                        text = colored(cell.gladiatorRef.name, 'green', attrs=['reverse', 'blink'])
+                        print(text + " ", end='')
+                    elif cell.gladiatorRef.name == "Y":
+                        text = colored(cell.gladiatorRef.name, 'yellow', attrs=['reverse', 'blink'])
+                        print(text + " ", end='')
             print()
+
 
     def executeMove(self, gladiator, drow, dcol):
 
@@ -177,6 +187,8 @@ class World:
                     if [gladiator.position[0], gladiator.position[1]] in self.buffs[type][size]["indicies"]:
                         gladiator.damage = int(gladiator.damage * self.buffs[type][size]["multiplier"])
                         self.buffs[type][size]["indicies"].remove(gladiator.position)
+
+            # TODO clear thrash below
             # gladiator.damage *= self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff
             # gladiator.damage = int(gladiator.damage)
             # self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff = 1.0
@@ -263,11 +275,14 @@ class World:
 
     def move(self):
         for gladiator in self.gladiatorArray:
+
             for move in range(gladiator.speed):
+
                 if gladiator.isDead:
-                    self.cells[gladiator.position[0]][gladiator.position[1]].isOccupied = False
-                    self.cells[gladiator.position[0]][gladiator.position[1]].gladiatorRef = None
-                    self.gladiatorArray.remove(gladiator)
+                   # TODO clean thrash below
+                   # self.cells[gladiator.position[0]][gladiator.position[1]].isOccupied = False
+                   # self.cells[gladiator.position[0]][gladiator.position[1]].gladiatorRef = None
+                   # self.gladiatorArray.remove(gladiator)
                     break
 
                 all_moves = [[1, -1], [1, 0], [1, 1], [0, -1], [0, 1], [-1, -1], [-1, 0], [-1, 1]]
@@ -296,8 +311,9 @@ class World:
                     targetRow, targetCol = self.findClosestEnemy(gladiator)
                     drow, dcol = self.followTarget(gladiator, self.cells[targetRow][targetCol])
 
-                # TODO make this shit not random POGCHAMP
+                # TODO make this shit not random POGCHAMP, Ghinter: is this shit done?
                 # random choice of possible moves
+                # TODO clear thrash below
                 # drow, dcol = random.choice(moves)
                 # drow, dcol = self.followTarget(gladiator, self.cells[8][8])
 
@@ -306,19 +322,8 @@ class World:
                     drow, dcol = random.choice(moves)
 
                 print()
-                print(gladiator.name, " position: ", gladiator.position)
 
                 self.executeMove(gladiator, drow, dcol)  # execute move of gladiator
-
-                # TODO dodać widownię dookoła areny que?
-                # os.system('cls')
-
-                # check if the game is over
-                if len(self.gladiatorArray) <= 1:
-                    self.gameOver = True
-                    print(self.gladiatorArray[0].name + "won the game!!!")
-                    break
-
                 self.printWorld()
 
         self.roundCounter += 1
@@ -328,7 +333,7 @@ class World:
             print("ALERT!! ARENA IS SHRINKING !!")
             self.arenaBoundary += 1
 
-            # push gladiator outside the boundaries
+            # push gladiators outside the boundaries
             for gladiator in self.gladiatorArray:
 
                 # check if a gladiator is inside arena
@@ -380,15 +385,13 @@ class World:
                 defender.hp -= damageToDeal
                 print(attacker.name, "dealt ", damageToDeal, "damage, ", defender.name, " HP = ", defender.hp)
             else:
-                pass
                 print(attacker.name, " dealt 0 damage, ", defender.name, " HP = ", defender.hp)
             if defender.hp <= 0:
                 print(defender.name, " died in a battle, ", attacker.name, " is victorious!")
 
                 # delete defender
                 defender.isDead = True
-                self.cells[defender.position[0]][defender.position[1]].isOccupied = False
-                self.cells[defender.position[0]][defender.position[1]].gladiatorRef = None
+                self.cells[defender.position[0]][defender.position[1]].gladiatorRef = attacker
                 self.gladiatorArray.remove(defender)
                 wait(3)
                 # end of the fight - exit loop
@@ -411,14 +414,23 @@ class World:
                 # delete attacker
 
                 attacker.isDead = True
-
-                # wait(5)
+                #self.cells[attacker.position[0]][attacker.position[1]].isOccupied = False
+                #self.cells[attacker.position[0]][attacker.position[1]].gladiatorRef = None
+                self.gladiatorArray.remove(attacker)
                 # end of the fight - exit loop
                 defender.defense = defenderDefaultDefense
                 break
             attacker.defense += -1
             wait(0.3)
-        wait(3)
+
+        print("Ammount of Gladiators: ", len(self.gladiatorArray))
+        if len(self.gladiatorArray) <= 1:
+            self.gameOver = True
+            print(self.gladiatorArray[0].name + " won the game!!!")
+            wait(3)
+            quit()
+
+
 
 
 ########################################################################################################################
@@ -426,21 +438,44 @@ class World:
 
 def main():
     world = World()
+
     while not world.gameOver:
-        # world.printWorld()
+        wait(1)
+        world.printWorld()
         world.move()
-
-
-def test():
-    for i in range(1000):
-        # disable print
-        sys.stdout = sys.__stdout__
-        # enable print
-        print(i)
-        sys.stdout = open(os.devnull, 'w')
-        main()
-    print("Zajebiście działa")
 
 if __name__ == "__main__":
     main()
-    # test()
+
+
+'''
+#TESTING META ONLY
+def main():
+    redWins = 0
+    blueWins = 0
+    yellowWins = 0
+    greenWins = 0
+
+    for i in range (100):
+         print("Simulation number ", i)
+         world = World()
+         while not world.gameOver:
+            world.move()
+         if world.gladiatorArray[0].name == "R":
+             redWins += 1
+         elif world.gladiatorArray[0].name == "B":
+             blueWins += 1
+         elif world.gladiatorArray[0].name == "Y":
+            yellowWins += 1
+         elif world.gladiatorArray[0].name == "G":
+            greenWins += 1
+
+
+    print("Red wins: ", redWins)
+    print("Blue wins: ", blueWins)
+    print("Yellow wins: ", yellowWins)
+    print("Green wins: ", greenWins)
+    wait(10)
+if __name__ == "__main__":
+    main()
+'''

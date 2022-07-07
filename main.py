@@ -176,7 +176,7 @@ class World:
             for type in self.buffs:  # for now there is only "Damage"
                 for size in self.buffs[type]:  # rozmiar buffa "small" or "big":
                     if [gladiator.position[0], gladiator.position[1]] in self.buffs[type][size]["indicies"]:
-                        gladiator.damage *= self.buffs[type][size]["multiplier"]
+                        gladiator.damage = int(gladiator.damage * self.buffs[type][size]["multiplier"])
                         self.buffs[type][size]["indicies"].remove(gladiator.position)
             # gladiator.damage *= self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff
             # gladiator.damage = int(gladiator.damage)
@@ -286,6 +286,7 @@ class World:
                 if gladiator.tactic == "green":
                     targetRow, targetCol = self.findClosestBuff(gladiator, "big")
                     if not targetRow:
+                        print("chuj")
                         targetRow, targetCol = self.findClosestEnemy(gladiator)
                     drow, dcol = self.followTarget(gladiator, self.cells[targetRow][targetCol])
                 elif gladiator.tactic == "blue":
@@ -304,7 +305,6 @@ class World:
 
                 # check if calculated move is valid
                 if not [drow, dcol] in moves:
-                    print("chuj")
                     drow, dcol = random.choice(moves)
 
                 print()
@@ -354,11 +354,16 @@ class World:
                     print()
                     print(gladiator.name, " is about to being pushed into arena")
                     self.executeMove(gladiator, drow, dcol)
+
+            # disable a cell that is no longer valid
             for row in self.cells:
                 for cell in row:
                     if cell.row < self.arenaBoundary or cell.row > self.sizeX - self.arenaBoundary - 1 or \
                             cell.col < self.arenaBoundary or cell.col > self.sizeY - self.arenaBoundary - 1:
                         cell.isActive = False
+                    # remove buff
+                    if [cell.row, cell.col] in self.buffs["Damage"]["small"]["indicies"]:
+                        self.buffs["Damage"]["small"]["indicies"].remove([cell.row, cell.col])
 
     def fight(self, attacker, defender):
         print(attacker.name, "is attacking ", defender.name, ". Prepare for battle!")
@@ -408,8 +413,6 @@ class World:
                 # delete attacker
 
                 attacker.isDead = True
-                self.cells[attacker.position[0]][attacker.position[1]].isOccupied = False
-                self.cells[attacker.position[0]][attacker.position[1]].gladiatorRef = None
 
                 # wait(5)
                 # end of the fight - exit loop

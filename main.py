@@ -3,6 +3,8 @@ from random import randint
 import json
 import math
 from termcolor import colored
+import starknet_py.net import Client
+from starknet_py.net.networks import TESTNET, MAINNET
 
 from tools import wait, clearScreen
 import numpy as np
@@ -176,6 +178,7 @@ class World:
         if self.cells[gladiator.position[0]][gladiator.position[1]].isOccupied:
             # initiate fight
             self.fight(gladiator, self.cells[gladiator.position[0]][gladiator.position[1]].gladiatorRef)
+
         else:
             # create new gladiator reference in cell (make normal move)
             self.cells[gladiator.position[0]][gladiator.position[1]].isOccupied = True
@@ -187,7 +190,6 @@ class World:
                     if [gladiator.position[0], gladiator.position[1]] in self.buffs[type][size]["indicies"]:
                         gladiator.damage = int(gladiator.damage * self.buffs[type][size]["multiplier"])
                         self.buffs[type][size]["indicies"].remove(gladiator.position)
-
             # TODO clear thrash below
             # gladiator.damage *= self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff
             # gladiator.damage = int(gladiator.damage)
@@ -324,6 +326,12 @@ class World:
                 print()
 
                 self.executeMove(gladiator, drow, dcol)  # execute move of gladiator
+                print("Ammount of Gladiators: ", len(self.gladiatorArray))
+                if len(self.gladiatorArray) <= 1:
+                    self.gameOver = True
+                    print(self.gladiatorArray[0].name + " won the game!!!")
+                    wait(3)
+                    return
                 self.printWorld()
 
         self.roundCounter += 1
@@ -423,12 +431,7 @@ class World:
             attacker.defense += -1
             wait(0.3)
 
-        print("Ammount of Gladiators: ", len(self.gladiatorArray))
-        if len(self.gladiatorArray) <= 1:
-            self.gameOver = True
-            print(self.gladiatorArray[0].name + " won the game!!!")
-            wait(3)
-            quit()
+
 
 
 

@@ -188,12 +188,6 @@ class World:
                     if [gladiator.position[0], gladiator.position[1]] in self.buffs[type][size]["indicies"]:
                         gladiator.damage = int(gladiator.damage * self.buffs[type][size]["multiplier"])
                         self.buffs[type][size]["indicies"].remove(gladiator.position)
-            # TODO clear thrash below
-            # gladiator.damage *= self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff
-            # gladiator.damage = int(gladiator.damage)
-            # self.cells[gladiator.position[0]][gladiator.position[1]].dmgBuff = 1.0
-
-            # TODO print info about collecting buff
 
     def followTarget(self, gladiator, target):
         deltaRow = gladiator.position[0] - target.row
@@ -279,10 +273,6 @@ class World:
             for move in range(gladiator.speed):
 
                 if gladiator.isDead:
-                   # TODO clean thrash below
-                   # self.cells[gladiator.position[0]][gladiator.position[1]].isOccupied = False
-                   # self.cells[gladiator.position[0]][gladiator.position[1]].gladiatorRef = None
-                   # self.gladiatorArray.remove(gladiator)
                     break
 
                 all_moves = [[1, -1], [1, 0], [1, 1], [0, -1], [0, 1], [-1, -1], [-1, 0], [-1, 1]]
@@ -310,12 +300,6 @@ class World:
                 elif gladiator.tactic == "red":
                     targetRow, targetCol = self.findClosestEnemy(gladiator)
                     drow, dcol = self.followTarget(gladiator, self.cells[targetRow][targetCol])
-
-                # TODO make this shit not random POGCHAMP, Ghinter: is this shit done?
-                # random choice of possible moves
-                # TODO clear thrash below
-                # drow, dcol = random.choice(moves)
-                # drow, dcol = self.followTarget(gladiator, self.cells[8][8])
 
                 # check if calculated move is valid
                 if not [drow, dcol] in moves:
@@ -420,8 +404,6 @@ class World:
                 # delete attacker
 
                 attacker.isDead = True
-                #self.cells[attacker.position[0]][attacker.position[1]].isOccupied = False
-                #self.cells[attacker.position[0]][attacker.position[1]].gladiatorRef = None
                 self.gladiatorArray.remove(attacker)
                 # end of the fight - exit loop
                 defender.defense = defenderDefaultDefense

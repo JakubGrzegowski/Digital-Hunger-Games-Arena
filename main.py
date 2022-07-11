@@ -3,8 +3,6 @@ from random import randint
 import json
 import math
 from termcolor import colored
-import starknet_py.net import Client
-from starknet_py.net.networks import TESTNET, MAINNET
 
 from tools import wait, clearScreen
 import numpy as np
